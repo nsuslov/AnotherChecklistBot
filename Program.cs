@@ -3,9 +3,11 @@ using Telegram.Bot.Polling;
 using AnotherChecklistBot.ReceiverService;
 using AnotherChecklistBot.Configurations;
 using AnotherChecklistBot.Services.UpdateHandler;
+using AnotherChecklistBot.Data.Context;
 
 var builder = Host.CreateApplicationBuilder(args);
 
+builder.Services.AddDbContext<ApplicationContext>();
 builder.Services.AddTransient<IUpdateHandler, UpdateHandler>();
 builder.Services
     .AddHttpClient("telegram_bot_client")
@@ -19,5 +21,10 @@ builder.Services
 builder.Services.AddHostedService<ReceiverService>();
 
 var host = builder.Build();
+using (var scope = host.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationContext>();
+    dbContext.Migrate();
+}
 
 host.Run();
