@@ -1,14 +1,17 @@
 using Telegram.Bot;
 using Telegram.Bot.Polling;
-using AnotherChecklistBot.ReceiverService;
 using AnotherChecklistBot.Configurations;
 using AnotherChecklistBot.Services.UpdateHandler;
 using AnotherChecklistBot.Data.Context;
+using AnotherChecklistBot.Services.MessageHandler;
+using AnotherChecklistBot.Services.ReceiverService;
+using AnotherChecklistBot.Services.CommandHandler;
+using AnotherChecklistBot.Services.CallbackQueryHandler;
 
 var builder = Host.CreateApplicationBuilder(args);
 
 builder.Services.AddDbContext<ApplicationContext>();
-builder.Services.AddTransient<IUpdateHandler, UpdateHandler>();
+builder.Services.AddSingleton<IUpdateHandler, UpdateHandler>();
 builder.Services
     .AddHttpClient("telegram_bot_client")
     .AddTypedClient<ITelegramBotClient>((httpClient, serviceProvider) =>
@@ -17,6 +20,9 @@ builder.Services
         var options = new TelegramBotClientOptions(configuration.Token);
         return new TelegramBotClient(options, httpClient);
     });
+builder.Services.AddScoped<IMessageHandler, MessageHandler>();
+builder.Services.AddScoped<ICommandHandler, CommandHandler>();
+builder.Services.AddScoped<ICallbackQueryHandler, CallbackQueryHandler>();
 
 builder.Services.AddHostedService<ReceiverService>();
 

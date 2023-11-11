@@ -4,7 +4,7 @@ using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types.Enums;
 
-namespace AnotherChecklistBot.ReceiverService;
+namespace AnotherChecklistBot.Services.ReceiverService;
 
 public class ReceiverService : BackgroundService
 {
