@@ -7,6 +7,7 @@ namespace AnotherChecklistBot.Services.MessageHandler;
 
 public class MessageHandler : IMessageHandler
 {
+    private static readonly string[] Separators = { "\n", ",", ";", " " };
     private IMessageSender _messageSender;
 
     public MessageHandler(IMessageSender messageSender)
@@ -18,7 +19,19 @@ public class MessageHandler : IMessageHandler
         if (message.From is null) return Task.CompletedTask;
         if (message.Text is null) return Task.CompletedTask;
 
-        _messageSender.SendMessage(new SendMessageRequest(message.From.Id, message.Text));
+        var items = SplitItems(message.Text);
+        var messages = items.Select(item => new SendMessageRequest(message.From.Id, item)).ToArray();
+        _messageSender.SendMessage(messages);
         return Task.CompletedTask;
+    }
+
+    private string[] SplitItems(string text)
+    {
+        foreach (var separator in Separators)
+        {
+            var items = text.Split(separator, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            if (items.Length > 1) return items;
+        }
+        return new[] { text };
     }
 }
