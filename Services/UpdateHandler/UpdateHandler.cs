@@ -35,6 +35,10 @@ public class UpdateHandler : IUpdateHandler
                 if (update.Message is null) break;
                 await HandleMessageAsync(botClient, update.Message, cancellationToken);
                 break;
+            case UpdateType.EditedMessage:
+                if (update.EditedMessage is null) break;
+                await HandleMessageAsync(botClient, update.EditedMessage, cancellationToken);
+                break;
             case UpdateType.CallbackQuery:
                 if (update.CallbackQuery is null) break;
                 await HandleCallbackQueryAsync(botClient, update.CallbackQuery, cancellationToken);
