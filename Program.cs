@@ -7,11 +7,13 @@ using AnotherChecklistBot.Services.MessageHandler;
 using AnotherChecklistBot.Services.ReceiverService;
 using AnotherChecklistBot.Services.CommandHandler;
 using AnotherChecklistBot.Services.CallbackQueryHandler;
+using AnotherChecklistBot.Services.MessageSender;
 
 var builder = Host.CreateApplicationBuilder(args);
 
 builder.Services.AddDbContext<ApplicationContext>();
 builder.Services.AddSingleton<IUpdateHandler, UpdateHandler>();
+builder.Services.AddSingleton<IMessageSender, QueueMessageSender>();
 builder.Services
     .AddHttpClient("telegram_bot_client")
     .AddTypedClient<ITelegramBotClient>((httpClient, serviceProvider) =>
@@ -32,5 +34,4 @@ using (var scope = host.Services.CreateScope())
     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationContext>();
     dbContext.Migrate();
 }
-
 host.Run();
