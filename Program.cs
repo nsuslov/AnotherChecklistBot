@@ -8,10 +8,12 @@ using AnotherChecklistBot.Services.ReceiverService;
 using AnotherChecklistBot.Services.CommandHandler;
 using AnotherChecklistBot.Services.CallbackQueryHandler;
 using AnotherChecklistBot.Services.MessageSender;
+using AnotherChecklistBot.Data.Repositories;
 
 var builder = Host.CreateApplicationBuilder(args);
 
 builder.Services.AddDbContext<ApplicationContext>();
+builder.Services.AddScoped<IChecklistRepository, ChecklistRepository>();
 builder.Services.AddSingleton<IUpdateHandler, UpdateHandler>();
 builder.Services.AddSingleton<IMessageSender, QueueMessageSender>();
 builder.Services

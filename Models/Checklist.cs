@@ -7,6 +7,6 @@ public class Checklist
     public long SourceChatId { get; set; }
     public long SourceMessageId { get; set; }
 
-    public List<ListItem> ListItems = default!;
-    public List<ChecklistMessage> ChecklistMessages { get; set; } = default!;
+    public ICollection<ListItem> ListItems { get; set; } = default!;
+    public ICollection<ChecklistMessage> ChecklistMessages { get; set; } = default!;
 }
