@@ -1,3 +1,4 @@
+using AnotherChecklistBot.Services.ChecklistService;
 using AnotherChecklistBot.Services.MessageSender;
 using Telegram.Bot;
 using Telegram.Bot.Requests;
@@ -9,20 +10,22 @@ public class MessageHandler : IMessageHandler
 {
     private static readonly string[] Separators = { "\n", ",", ";", " " };
     private IMessageSender _messageSender;
+    private IChecklistService _checklistService;
 
-    public MessageHandler(IMessageSender messageSender)
+    public MessageHandler(
+        IMessageSender messageSender,
+        IChecklistService checklistService)
     {
         _messageSender = messageSender;
+        _checklistService = checklistService;
     }
-    public Task OnMessageAsync(ITelegramBotClient botClient, Message message, CancellationToken cancellationToken)
+    public async Task OnMessageAsync(ITelegramBotClient botClient, Message message, CancellationToken cancellationToken)
     {
-        if (message.From is null) return Task.CompletedTask;
-        if (message.Text is null) return Task.CompletedTask;
-
+        if (message.From is null) return;
+        if (message.Text is null) return;
+        System.Console.WriteLine(message.Text);
         var items = SplitItems(message.Text);
-        var messages = items.Select(item => new SendMessageRequest(message.From.Id, item)).ToArray();
-        _messageSender.SendMessage(messages);
-        return Task.CompletedTask;
+        await _checklistService.CreateChecklist(items, message.From.Id, message.MessageId);
     }
 
     private string[] SplitItems(string text)

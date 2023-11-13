@@ -9,13 +9,14 @@ using AnotherChecklistBot.Services.CommandHandler;
 using AnotherChecklistBot.Services.CallbackQueryHandler;
 using AnotherChecklistBot.Services.MessageSender;
 using AnotherChecklistBot.Data.Repositories;
+using AnotherChecklistBot.Services.ChecklistService;
 
 var builder = Host.CreateApplicationBuilder(args);
 
 builder.Services.AddDbContext<ApplicationContext>();
 builder.Services.AddScoped<IChecklistRepository, ChecklistRepository>();
-builder.Services.AddSingleton<IUpdateHandler, UpdateHandler>();
-builder.Services.AddSingleton<IMessageSender, QueueMessageSender>();
+builder.Services.AddScoped<IListItemRepository, ListItemRepository>();
+builder.Services.AddScoped<IChecklistMessageRepository, ChecklistMessageRepository>();
 builder.Services
     .AddHttpClient("telegram_bot_client")
     .AddTypedClient<ITelegramBotClient>((httpClient, serviceProvider) =>
@@ -24,9 +25,12 @@ builder.Services
         var options = new TelegramBotClientOptions(configuration.Token);
         return new TelegramBotClient(options, httpClient);
     });
+builder.Services.AddSingleton<IUpdateHandler, UpdateHandler>();
+builder.Services.AddSingleton<IMessageSender, QueueMessageSender>();
 builder.Services.AddScoped<IMessageHandler, MessageHandler>();
 builder.Services.AddScoped<ICommandHandler, CommandHandler>();
 builder.Services.AddScoped<ICallbackQueryHandler, CallbackQueryHandler>();
+builder.Services.AddScoped<IChecklistService, ChecklistService>();
 
 builder.Services.AddHostedService<ReceiverService>();
 

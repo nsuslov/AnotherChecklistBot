@@ -1,5 +1,6 @@
 using AnotherChecklistBot.Data.Context;
 using AnotherChecklistBot.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace AnotherChecklistBot.Data.Repositories;
 
@@ -30,5 +31,7 @@ public class ChecklistRepository : IChecklistRepository
     }
 
     public Checklist? GetById(long id) =>
-        _context.Checklists.FirstOrDefault(e => e.Id == id);
+        _context.Checklists
+            .Include(e => e.ListItems.OrderBy(s => s.Id))
+            .FirstOrDefault(e => e.Id == id);
 }

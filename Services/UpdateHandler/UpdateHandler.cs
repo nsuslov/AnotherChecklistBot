@@ -29,22 +29,28 @@ public class UpdateHandler : IUpdateHandler
 
     public async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
     {
-        switch (update.Type)
+        try
         {
-            case UpdateType.Message:
-                if (update.Message is null) break;
-                await HandleMessageAsync(botClient, update.Message, cancellationToken);
-                break;
-            case UpdateType.EditedMessage:
-                if (update.EditedMessage is null) break;
-                await HandleMessageAsync(botClient, update.EditedMessage, cancellationToken);
-                break;
-            case UpdateType.CallbackQuery:
-                if (update.CallbackQuery is null) break;
-                await HandleCallbackQueryAsync(botClient, update.CallbackQuery, cancellationToken);
-                break;
-            default:
-                throw new NotImplementedException(update.Type.ToString());
+            switch (update.Type)
+            {
+                case UpdateType.Message:
+                    if (update.Message is null) break;
+                    await HandleMessageAsync(botClient, update.Message, cancellationToken);
+                    break;
+                case UpdateType.EditedMessage:
+                    if (update.EditedMessage is null) break;
+                    await HandleMessageAsync(botClient, update.EditedMessage, cancellationToken);
+                    break;
+                case UpdateType.CallbackQuery:
+                    if (update.CallbackQuery is null) break;
+                    await HandleCallbackQueryAsync(botClient, update.CallbackQuery, cancellationToken);
+                    break;
+                default:
+                    _logger.LogError($"Not implemented {update.Type}");
+                    throw new NotImplementedException(update.Type.ToString());
+            }
+        } catch (Exception exception) {
+            _logger.LogError(exception, exception.Message);
         }
     }
 
