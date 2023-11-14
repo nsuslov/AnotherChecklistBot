@@ -5,8 +5,8 @@ namespace AnotherChecklistBot.Services.MessageSender;
 
 public interface IMessageSender
 {
-    public void SendMessage(SendMessageRequest message);
-    public void SendMessage(ICollection<SendMessageRequest> messages);
-    public void EditMessageText(EditMessageTextRequest message);
+    public Task<Message> SendMessage(SendMessageRequest message);
+    public void SendMessages(ICollection<SendMessageRequest> messages);
+    public Task<Message> EditMessageText(EditMessageTextRequest message);
     public void EditMessageText(ICollection<EditMessageTextRequest> messages);
 }

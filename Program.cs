@@ -10,6 +10,7 @@ using AnotherChecklistBot.Services.CallbackQueryHandler;
 using AnotherChecklistBot.Services.MessageSender;
 using AnotherChecklistBot.Data.Repositories;
 using AnotherChecklistBot.Services.ChecklistService;
+using AnotherChecklistBot.Services.MessageBuilder;
 
 var builder = Host.CreateApplicationBuilder(args);
 
@@ -31,6 +32,7 @@ builder.Services.AddScoped<IMessageHandler, MessageHandler>();
 builder.Services.AddScoped<ICommandHandler, CommandHandler>();
 builder.Services.AddScoped<ICallbackQueryHandler, CallbackQueryHandler>();
 builder.Services.AddScoped<IChecklistService, ChecklistService>();
+builder.Services.AddSingleton<IMessageBuilder, MessageBuilder>();
 
 builder.Services.AddHostedService<ReceiverService>();
 
