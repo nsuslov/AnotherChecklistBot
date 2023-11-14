@@ -39,7 +39,7 @@ public class ChecklistService : IChecklistService
             items: items
         );
 
-        var sendMessageRequest = await _messageBuilder.BuildSendMessageRequest(checklist, chatId);
+        var sendMessageRequest = _messageBuilder.BuildSendMessageRequest(checklist, chatId);
         var message = await _messageSender.SendMessage(sendMessageRequest);
         _checklistMessageRepository.AddOrUpdate(chatId, message.MessageId, checklist.Id);
     }
@@ -59,7 +59,7 @@ public class ChecklistService : IChecklistService
             );
         }
 
-        var sendMessageRequest = await _messageBuilder.BuildSendMessageRequest(checklist, chatId);
+        var sendMessageRequest = _messageBuilder.BuildSendMessageRequest(checklist, chatId);
         var message = await _messageSender.SendMessage(sendMessageRequest);
         _checklistMessageRepository.AddOrUpdate(chatId, message.MessageId, checklist.Id);
     }
@@ -77,13 +77,13 @@ public class ChecklistService : IChecklistService
         if (listItem is null) return;
         var checklist = _checklistRepository.GetById(listItem.ChecklistId);
         if (checklist is null) return;
-        var editMessageTextRequest = await _messageBuilder.BuildEditMessageTextRequest(checklist, chatId, checklistMessage.MessageId);
+        var editMessageTextRequest = _messageBuilder.BuildEditMessageTextRequest(checklist, chatId, checklistMessage.MessageId);
         await _messageSender.EditMessageText(editMessageTextRequest);
         var checklistMessages = _checklistMessageRepository.GetAllByChecklistId(checklistId);
-        var editMessageTextRequests = await Task.WhenAll(checklistMessages
+        var editMessageTextRequests = checklistMessages
             .Where(e => e.ChatId != chatId)
-            .Select(async e => await _messageBuilder.BuildEditMessageTextRequest(checklist, e.ChatId, e.MessageId))
-            .ToList());
+            .Select(e => _messageBuilder.BuildEditMessageTextRequest(checklist, e.ChatId, e.MessageId))
+            .ToList();
         _messageSender.EditMessageText(editMessageTextRequests);
     }
 

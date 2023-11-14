@@ -13,16 +13,16 @@ public class MessageBuilder : IMessageBuilder
         { true, "✅" },
         { false, "❌" }
     };
-    private readonly Lazy<Task<User>> _botUser;
+    private readonly Lazy<string> _botUsername;
 
     public MessageBuilder(ITelegramBotClient botClient)
     {
-        _botUser = new Lazy<Task<User>>(() => botClient.GetMeAsync());
+        _botUsername = new Lazy<string>(() => botClient.GetMeAsync().Result.Username ?? "");
     }
 
-    public async Task<SendMessageRequest> BuildSendMessageRequest(Checklist checklist, long chatId)
+    public SendMessageRequest BuildSendMessageRequest(Checklist checklist, long chatId)
     {
-        var text = await GetMessageText(checklist);
+        var text = GetMessageText(checklist);
         var replyMarkup = GetReplyMarkup(checklist);
         return new SendMessageRequest(chatId, text)
         {
@@ -31,9 +31,9 @@ public class MessageBuilder : IMessageBuilder
         };
     }
 
-    public async Task<EditMessageTextRequest> BuildEditMessageTextRequest(Checklist checklist, long chatId, int messageId)
+    public EditMessageTextRequest BuildEditMessageTextRequest(Checklist checklist, long chatId, int messageId)
     {
-        var text = await GetMessageText(checklist);
+        var text = GetMessageText(checklist);
         var replyMarkup = GetReplyMarkup(checklist);
         return new EditMessageTextRequest(chatId, messageId, text)
         {
@@ -42,14 +42,13 @@ public class MessageBuilder : IMessageBuilder
         };
     }
 
-    private async Task<string> GetMessageText(Checklist checklist)
+    private string GetMessageText(Checklist checklist)
     {
         var itemsCount = checklist.ListItems.Count;
         var checkedCount = checklist.ListItems.Count(item => item.Checked);
         var title = $"Список: {checkedCount} из {itemsCount}";
 
-        var username = (await _botUser.Value).Username;
-        var sharedUrl = $"https://t.me/{username}?start={checklist.Id}-{checklist.Secret}";
+        var sharedUrl = $"https://t.me/{_botUsername.Value}?start={checklist.Id}-{checklist.Secret}";
 
         return $"<a href=\"{sharedUrl}\"><b>{title}</b></a>";
     }
