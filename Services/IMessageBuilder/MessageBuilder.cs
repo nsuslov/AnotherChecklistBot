@@ -27,7 +27,8 @@ public class MessageBuilder : IMessageBuilder
         return new SendMessageRequest(chatId, text)
         {
             ReplyMarkup = replyMarkup,
-            ParseMode = ParseMode.Html
+            ParseMode = ParseMode.Html,
+            DisableWebPagePreview = true
         };
     }
 
@@ -38,7 +39,8 @@ public class MessageBuilder : IMessageBuilder
         return new EditMessageTextRequest(chatId, messageId, text)
         {
             ReplyMarkup = replyMarkup,
-            ParseMode = ParseMode.Html
+            ParseMode = ParseMode.Html,
+            DisableWebPagePreview = true
         };
     }
 
