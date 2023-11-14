@@ -1,4 +1,5 @@
 
+using Telegram.Bot;
 using AnotherChecklistBot.Data.Repositories;
 using AnotherChecklistBot.Services.MessageBuilder;
 using AnotherChecklistBot.Services.MessageSender;
@@ -10,6 +11,7 @@ public class ChecklistService : IChecklistService
     private readonly IChecklistRepository _checklistRepository;
     private readonly IListItemRepository _listItemRepository;
     private readonly IChecklistMessageRepository _checklistMessageRepository;
+    private readonly ITelegramBotClient _botClient;
     private readonly IMessageBuilder _messageBuilder;
     private readonly IMessageSender _messageSender;
 
@@ -17,12 +19,14 @@ public class ChecklistService : IChecklistService
         IChecklistRepository checklistRepository,
         IListItemRepository listItemRepository,
         IChecklistMessageRepository checklistMessageRepository,
+        ITelegramBotClient botClient,
         IMessageBuilder messageBuilder,
         IMessageSender messageSender)
     {
         _checklistRepository = checklistRepository;
         _listItemRepository = listItemRepository;
         _checklistMessageRepository = checklistMessageRepository;
+        _botClient = botClient;
         _messageBuilder = messageBuilder;
         _messageSender = messageSender;
     }
@@ -40,9 +44,24 @@ public class ChecklistService : IChecklistService
         _checklistMessageRepository.AddOrUpdate(chatId, message.MessageId, checklist.Id);
     }
 
-    public Task JoinChecklist(long checklistId, Guid secret, long chatId, int messageId)
+    public async Task JoinChecklist(long checklistId, Guid secret, long chatId, int messageId)
     {
-        throw new NotImplementedException();
+        var checklist = _checklistRepository.GetById(checklistId);
+        if (checklist is null) return;
+        if (secret != checklist.Secret) return;
+
+        var oldMessage = _checklistMessageRepository.Get(chatId, checklistId);
+        if (oldMessage is not null)
+        {
+            await _botClient.DeleteMessageAsync(
+                chatId: oldMessage.ChatId,
+                messageId: oldMessage.MessageId
+            );
+        }
+
+        var sendMessageRequest = await _messageBuilder.BuildSendMessageRequest(checklist, chatId);
+        var message = await _messageSender.SendMessage(sendMessageRequest);
+        _checklistMessageRepository.AddOrUpdate(chatId, message.MessageId, checklist.Id);
     }
 
     public async Task CheckItem(long checklistId, long listItemId, bool check, long chatId)
@@ -60,6 +79,12 @@ public class ChecklistService : IChecklistService
         if (checklist is null) return;
         var editMessageTextRequest = await _messageBuilder.BuildEditMessageTextRequest(checklist, chatId, checklistMessage.MessageId);
         await _messageSender.EditMessageText(editMessageTextRequest);
+        var checklistMessages = _checklistMessageRepository.GetAllByChecklistId(checklistId);
+        var editMessageTextRequests = await Task.WhenAll(checklistMessages
+            .Where(e => e.ChatId != chatId)
+            .Select(async e => await _messageBuilder.BuildEditMessageTextRequest(checklist, e.ChatId, e.MessageId))
+            .ToList());
+        _messageSender.EditMessageText(editMessageTextRequests);
     }
 
 }

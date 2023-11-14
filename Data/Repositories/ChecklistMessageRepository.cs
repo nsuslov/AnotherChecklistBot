@@ -35,4 +35,7 @@ public class ChecklistMessageRepository : IChecklistMessageRepository
 
     public ChecklistMessage? Get(long chatId, long checklistId) => _context.ChecklistMessages
         .FirstOrDefault(e => (e.ChatId == chatId) && (e.ChecklistId == checklistId));
+
+    public ICollection<ChecklistMessage> GetAllByChecklistId(long checklistId) =>
+        _context.ChecklistMessages.Where(e => e.ChecklistId == checklistId).ToList();
 }
