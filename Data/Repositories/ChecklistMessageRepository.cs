@@ -12,10 +12,11 @@ public class ChecklistMessageRepository : IChecklistMessageRepository
         _context = context;
     }
 
-    public ChecklistMessage AddOrUpdate(long chatId, long messageId, long checklistId)
+    public ChecklistMessage AddOrUpdate(long chatId, int messageId, long checklistId)
     {
         var checklistMessage = Get(chatId, checklistId);
-        if (checklistMessage is null) {
+        if (checklistMessage is null)
+        {
             checklistMessage = new ChecklistMessage
             {
                 ChatId = chatId,
@@ -23,7 +24,9 @@ public class ChecklistMessageRepository : IChecklistMessageRepository
                 MessageId = messageId
             };
             _context.ChecklistMessages.Add(checklistMessage);
-        } else {
+        }
+        else
+        {
             checklistMessage.MessageId = messageId;
         }
         _context.SaveChanges();
@@ -32,4 +35,7 @@ public class ChecklistMessageRepository : IChecklistMessageRepository
 
     public ChecklistMessage? Get(long chatId, long checklistId) => _context.ChecklistMessages
         .FirstOrDefault(e => (e.ChatId == chatId) && (e.ChecklistId == checklistId));
+
+    public ICollection<ChecklistMessage> GetAllByChecklistId(long checklistId) =>
+        _context.ChecklistMessages.Where(e => e.ChecklistId == checklistId).ToList();
 }

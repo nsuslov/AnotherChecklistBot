@@ -37,26 +37,20 @@ public class QueueMessageSender : IMessageSender
         _timer.Elapsed += TimerElapsed;
     }
 
-    public void SendMessage(SendMessageRequest message)
-    {
-        _messageQueue.Enqueue(message);
-        TryProcessing();
-    }
+    public async Task<Message> SendMessage(SendMessageRequest message) =>
+        await SendRequestAsync(message);
 
-    public void SendMessage(ICollection<SendMessageRequest> messages)
+    public void SendMessages(ICollection<SendMessageRequest> messages)
     {
         foreach (var message in messages)
         {
             _messageQueue.Enqueue(message);
         }
-        TryProcessing();
+        TryProcessingAsync();
     }
 
-    public void EditMessageText(EditMessageTextRequest message)
-    {
-        _messageQueue.Enqueue(message);
-        TryProcessing();
-    }
+    public async Task<Message> EditMessageText(EditMessageTextRequest message) =>
+        await SendRequestAsync(message);
 
     public void EditMessageText(ICollection<EditMessageTextRequest> messages)
     {
@@ -64,27 +58,27 @@ public class QueueMessageSender : IMessageSender
         {
             _messageQueue.Enqueue(message);
         }
-        TryProcessing();
+        TryProcessingAsync();
     }
 
-    private void TimerElapsed(object? sender, ElapsedEventArgs e) => ProcessQueue();
+    private void TimerElapsed(object? sender, ElapsedEventArgs e) => ProcessQueueAsync();
 
-    private void TryProcessing()
+    private void TryProcessingAsync()
     {
         if (!_isProcessing)
         {
             _isProcessing = true;
-            ProcessQueue();
+            ProcessQueueAsync();
         }
     }
 
-    private void ProcessQueue()
+    private void ProcessQueueAsync()
     {
         try
         {
             if (_messageQueue.TryPeek(out var message))
             {
-                _botClient.MakeRequestAsync(message, _cancellationToken).ConfigureAwait(continueOnCapturedContext: false);
+                _ = SendRequestAsync(message);
                 _messageQueue.TryDequeue(out _);
             }
             else
@@ -103,4 +97,7 @@ public class QueueMessageSender : IMessageSender
             _timer.Start();
         }
     }
+
+    private async Task<Message> SendRequestAsync(IRequest<Message> request) =>
+        await _botClient.MakeRequestAsync(request, _cancellationToken).ConfigureAwait(continueOnCapturedContext: false);
 }

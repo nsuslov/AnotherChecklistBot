@@ -20,9 +20,7 @@ public class CallbackQueryHandler : ICallbackQueryHandler
 
     public async Task OnCallbackQueryAsync(ITelegramBotClient botClient, CallbackQuery callbackQuery, CancellationToken cancellationToken)
     {
-        System.Console.WriteLine(callbackQuery.Data);
         if (callbackQuery.Data is null) return;
-
 
         var callbackData = DeserializeCallbackData(callbackQuery.Data);
         await _checklistService.CheckItem(
@@ -33,8 +31,10 @@ public class CallbackQueryHandler : ICallbackQueryHandler
         );
     }
 
-    private ListItemCallbackData DeserializeCallbackData(string text) {
-        try {
+    private ListItemCallbackData DeserializeCallbackData(string text)
+    {
+        try
+        {
             var data = text.Split(":");
             return new ListItemCallbackData
             {
@@ -42,7 +42,9 @@ public class CallbackQueryHandler : ICallbackQueryHandler
                 ListItemId = long.Parse(data[1]),
                 Check = bool.Parse(data[2])
             };
-        } catch (Exception ex) {
+        }
+        catch (Exception ex)
+        {
             _logger.LogError(ex, ex.Message);
             throw;
         }

@@ -13,9 +13,10 @@ public class ChecklistRepository : IChecklistRepository
         _context = context;
     }
 
-    public Checklist Create(long sourceChatId, long sourceMessageId, ICollection<string> items)
+    public Checklist Create(long sourceChatId, int sourceMessageId, ICollection<string> items)
     {
-        var listItems = items.Select(item => new ListItem {
+        var listItems = items.Select(item => new ListItem
+        {
             Text = item
         }).ToList();
         var checklist = new Checklist
@@ -31,7 +32,5 @@ public class ChecklistRepository : IChecklistRepository
     }
 
     public Checklist? GetById(long id) =>
-        _context.Checklists
-            .Include(e => e.ListItems.OrderBy(s => s.Id))
-            .FirstOrDefault(e => e.Id == id);
+        _context.Checklists.Include(e => e.ListItems).FirstOrDefault(e => e.Id == id);
 }
