@@ -23,7 +23,6 @@ public class MessageHandler : IMessageHandler
     {
         if (message.From is null) return;
         if (message.Text is null) return;
-        System.Console.WriteLine(message.Text);
         var items = SplitItems(message.Text);
         await _checklistService.CreateChecklist(items, message.From.Id, message.MessageId);
     }
