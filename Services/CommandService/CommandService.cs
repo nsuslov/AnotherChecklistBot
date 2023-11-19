@@ -1,5 +1,6 @@
 using System.Reflection;
 using AnotherChecklistBot.Commands;
+using AnotherChecklistBot.Services.MessageSender;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
@@ -8,15 +9,18 @@ namespace AnotherChecklistBot.Services.CommandService;
 public class CommandService : ICommandService
 {
     private readonly Lazy<Dictionary<string, CommandEntity>> _commandEntities;
+    private readonly IMessageSender _messageSender;
     private readonly object[] _commandConstructorArgs;
 
     public CommandService(
         IServiceScopeFactory scopeFactory,
         ILoggerFactory loggerFactory,
-        ITelegramBotClient botClient)
+        ITelegramBotClient botClient,
+        IMessageSender messageSender)
     {
         _commandConstructorArgs = [scopeFactory, loggerFactory, botClient];
         _commandEntities = new(() => GetCommandsFromAssembly());
+        _messageSender = messageSender;
     }
 
     public async Task TryExecuteCommand(List<string> args, Message message, CancellationToken cancellationToken)
@@ -29,7 +33,11 @@ public class CommandService : ICommandService
 
         var newArgs = args[1..];
 
-        await commandEntity.Instance.Execute(newArgs, message, cancellationToken);
+        var result = await commandEntity.Instance.Execute(newArgs, message, cancellationToken);
+        if (result is not null)
+        {
+            await _messageSender.SendMessage(result);
+        }
     }
 
     private Dictionary<string, CommandEntity> GetCommandsFromAssembly()

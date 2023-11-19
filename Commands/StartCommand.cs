@@ -1,6 +1,7 @@
 using AnotherChecklistBot.Models;
 using AnotherChecklistBot.Services.ChecklistService;
 using Telegram.Bot;
+using Telegram.Bot.Requests;
 using Telegram.Bot.Types;
 
 namespace AnotherChecklistBot.Commands;
@@ -20,13 +21,13 @@ public class StartCommand : BaseCommand
         _logger = loggerFactory.CreateLogger<StartCommand>();
     }
 
-    public override async Task Execute(List<string> args, Message message, CancellationToken cancellationToken)
+    public override async Task<SendMessageRequest?> Execute(List<string> args, Message message, CancellationToken cancellationToken)
     {
-        if (message.From is null) return;
+        if (message.From is null) return null;
 
         if (!args.Any())
         {
-            System.Console.WriteLine("WELCOME MESSAGE");
+            return await GetWelcomeMessage(message.From.Id);
         }
         else
         {
@@ -39,8 +40,15 @@ public class StartCommand : BaseCommand
                 chatId: message.From.Id,
                 messageId: message.MessageId
             );
+            return null;
         }
     }
+
+    private Task<SendMessageRequest> GetWelcomeMessage(long chatId) =>
+        Task.FromResult(new SendMessageRequest(
+            chatId: chatId,
+            text: "Привет!"
+        ));
 
     private SharedLinkData DeserializeSharedLinkData(string parameter)
     {
