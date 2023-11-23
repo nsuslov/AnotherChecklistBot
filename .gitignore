@@ -476,7 +476,7 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
-appsettings.Development.json
+appsettings.*.json
 
 *.db
 *.db-shm

@@ -5,13 +5,20 @@ namespace AnotherChecklistBot.Data.Context;
 
 public class ApplicationContext : DbContext
 {
+    private readonly IConfiguration _configuration;
+
     public DbSet<Checklist> Checklists => Set<Checklist>();
     public DbSet<ListItem> ListItems => Set<ListItem>();
     public DbSet<ChecklistMessage> ChecklistMessages => Set<ChecklistMessage>();
 
+    public ApplicationContext(IConfiguration configuration)
+    {
+        _configuration = configuration;
+    }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.UseSqlite(@"Data Source=store.db");
+        optionsBuilder.UseSqlite(_configuration.GetConnectionString("Default"));
     }
 
     public void Migrate()
