@@ -1,8 +1,9 @@
+using System.Collections.Immutable;
 using System.Reflection;
-using AnotherChecklistBot.Commands;
-using AnotherChecklistBot.Services.MessageSender;
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using AnotherChecklistBot.Commands;
+using AnotherChecklistBot.Services.MessageSender;
 
 namespace AnotherChecklistBot.Services.CommandService;
 
@@ -22,6 +23,8 @@ public class CommandService : ICommandService
         _commandEntities = new(() => GetCommandsFromAssembly());
         _messageSender = messageSender;
     }
+
+    public ImmutableList<CommandEntity> GetCommandEntities() => _commandEntities.Value.Values.ToImmutableList();
 
     public async Task TryExecuteCommand(List<string> args, Message message, CancellationToken cancellationToken)
     {

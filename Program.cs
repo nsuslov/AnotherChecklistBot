@@ -12,6 +12,7 @@ using AnotherChecklistBot.Data.Repositories;
 using AnotherChecklistBot.Services.ChecklistService;
 using AnotherChecklistBot.Services.MessageBuilder;
 using AnotherChecklistBot.Services.CommandService;
+using AnotherChecklistBot.Services.CommandRegistrationService;
 
 var builder = Host.CreateApplicationBuilder(args);
 
@@ -29,14 +30,15 @@ builder.Services
     });
 builder.Services.AddSingleton<IUpdateHandler, UpdateHandler>();
 builder.Services.AddSingleton<IMessageSender, QueueMessageSender>();
+builder.Services.AddSingleton<ICommandService, CommandService>();
 builder.Services.AddScoped<IMessageHandler, MessageHandler>();
 builder.Services.AddScoped<ICommandHandler, CommandHandler>();
-builder.Services.AddScoped<ICommandService, CommandService>();
 builder.Services.AddScoped<ICallbackQueryHandler, CallbackQueryHandler>();
 builder.Services.AddScoped<IChecklistService, ChecklistService>();
 builder.Services.AddSingleton<IMessageBuilder, MessageBuilder>();
 
 builder.Services.AddHostedService<ReceiverService>();
+builder.Services.AddHostedService<CommandRegistrationService>();
 
 var host = builder.Build();
 using (var scope = host.Services.CreateScope())
